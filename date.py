@@ -3,7 +3,8 @@ from datetime import date
 class Date:
     """A simple class holding a date."""
     props = {}
-    def __init__(self, name, date=date.today()):
+    def __init__(self, name, date=date.today(), usetime=True):
+        self.usetime = usetime
         self.name = name
         self.date = date
     def __str__(self):

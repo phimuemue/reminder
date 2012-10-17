@@ -1,6 +1,8 @@
 import itertools
 import os
 import os.path
+import time
+from datetime import timedelta, datetime
 
 from date import *
 
@@ -10,10 +12,12 @@ DATE_STRING_LENGTH = 10
 TIME_STRING_LENGTH = 8
 TEXT_WIDTH = 80 - 10 - 1 - 8 - 1
 DATE_FORMAT = "%d.%m.%Y"
+SEPARATE_DAYS = True
 
 # parameters for calendar files
 CALENDAR_PATH = os.path.expanduser("~/Documents/reminder/default.reminder")
-DATE_SAVED_FORMATS = ["%Y%m%d",     # format for date only
+DATE_SAVED_FORMATS = ["%Y%m%d",      # format for date only
+                      "%Y%m%d%H%M%S" # format for "everything"
                       ]
 DATE_INPUT_FORMATS = ["%Y%m%d",     # 20121026     (date only)
                       "%d.%m.%Y",   # 26.10.2012   (date only)
@@ -25,11 +29,14 @@ def printdates(raw_dates):
     dates = sorted(raw_dates, key=lambda x:x.date.date())
     for day, group in itertools.groupby(dates, lambda x:x.date.date()):
         first = True
+        if SEPARATE_DAYS:
+            print ""
         for event in sorted(group, key=lambda x:x.date.time()):
             name = wordwrap(str(event.name), TEXT_WIDTH)
             datestring = datetime.strftime(day,DATE_FORMAT)
+            tf = ["*"*TIME_STRING_LENGTH, str(event.date.time())[:8]]
             print "%s %s %s" % ([" "*DATE_STRING_LENGTH, datestring][first], 
-                                str(event.date.time())[:8],
+                                tf[event.usetime],
                                 name[0].strip())
             for r in name[1:]:
                 print " "*(DATE_STRING_LENGTH+TIME_STRING_LENGTH+2) + r.strip()
@@ -57,7 +64,22 @@ def initialize():
     global CONSOLE_WIDTH, TEXT_WIDTH
     CONSOLE_WIDTH = int(cols) if int(cols)!=0 else 80
     TEXT_WIDTH = CONSOLE_WIDTH - DATE_STRING_LENGTH - TIME_STRING_LENGTH - 2
-    opencalendar(CALENDAR_PATH)
+
+def extractdatefromcalendar(raw_date):
+    """Expects the *raw* date part (i.e. with type-specification
+    and +(y/w/d/number) and extracts the beginning and end and whether
+    the time is considered or not."""
+    date = raw_date[1:]
+    date = date.split("+")[0]
+    dsf = DATE_SAVED_FORMATS
+    if len(date)==16:
+        return (datetime.fromtimestamp(time.mktime(time.strptime(date[:8], dsf[0]))), 
+                datetime.fromtimestamp(time.mktime(time.strptime(date[8:], dsf[0]))), 
+                False)
+    else:
+        return (datetime.fromtimestamp(time.mktime(time.strptime(date[:14], dsf[1]))), 
+                datetime.fromtimestamp(time.mktime(time.strptime(date[14:], dsf[1]))), 
+                True)
 
 def opencalendar(path):
     """Opens a calendar file and returns a sorted array of dates and
@@ -78,30 +100,16 @@ def opencalendar(path):
     for line in f:
         parts = line.split("##")
         dateinfo = parts[0]
-        new = Date(parts[1], date=date)
-
-# ================================ test stuff
-
-
-
-import random
-from random import randrange
-from datetime import timedelta, datetime
-
-def random_date(start, end):
-    """
-    This function will return a random datetime between two datetime 
-    objects.
-    """
-    delta = end - start
-    int_delta = (delta.days * 24 * 60 * 60) + delta.seconds
-    random_second = randrange(int_delta)
-    return (start + timedelta(seconds=random_second))
-
-mydates = [Date("date " + str(i) + "".join([random.choice("abcdefgh  ") for _ in xrange(200)]), 
-                random_date(datetime.today(),datetime.today()+timedelta(2))) 
-           for i in xrange(5)]
+        (s,e,usetime) = extractdatefromcalendar(dateinfo)
+        new = Date(parts[1], s, usetime=usetime)
+        if dateinfo[0]=="d":
+            dates.append(new)
+        elif dateinfo[1]=="t":
+            tasks.append(new)
+        else:
+            print "Warning. Unknown category."
+    return (sorted(dates, key=lambda x:x.date), tasks)
 
 initialize()
-printdates(mydates)
+printdates(opencalendar(CALENDAR_PATH)[0])
 
