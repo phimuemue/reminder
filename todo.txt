@@ -1,0 +1,31 @@
+Wie sollen die Kalendereinträge organisiert sein?
+
+Anforderungen:
+. Verschiedene Typen (date vs. task)
+. Anfang
+. Ende
+* Wiederholungen (insb. Angaben ohne Jahreszahl unterstützen!)
+. Name
+. Kategorie
+. Beschreibung
+. Ort
+* Priorität
+* Einfach erweiter-/reduzierbar
+
+Vorschlag für Format (zeilenweise aufnotiert, in der Datei mittels "##" separiert, falls notwendig)
+
+(d|t) Erster Buchstabe für date bzw. task
+20121023192518 (Anfangsdatum: Jahr Monat Tag Stunde Minute Sekunde)
+20121024181523 (Enddatum, gleiches Format)
+(+(y/w/d/zahl))? (Wiederholungen. Optional.)
+##
+Name
+##
+Kategorie
+##
+Beschreibung
+##
+Ort
+## 
+Rest wird mittels key=value-Zeug geschmiert
+

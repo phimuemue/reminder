@@ -1,23 +1,37 @@
 import itertools
 import os
+import os.path
 
 from date import *
 
+# parameters for pretty-print-output
 CONSOLE_WIDTH = 80
 DATE_STRING_LENGTH = 10
 TIME_STRING_LENGTH = 8
 TEXT_WIDTH = 80 - 10 - 1 - 8 - 1
+DATE_FORMAT = "%d.%m.%Y"
 
-def printdates(dates):
+# parameters for calendar files
+CALENDAR_PATH = os.path.expanduser("~/Documents/reminder/default.reminder")
+DATE_SAVED_FORMATS = ["%Y%m%d",     # format for date only
+                      ]
+DATE_INPUT_FORMATS = ["%Y%m%d",     # 20121026     (date only)
+                      "%d.%m.%Y",   # 26.10.2012   (date only)
+                      "%Y%m%d%H%M", # 201210261930 (date and time)
+                      ]
+
+def printdates(raw_dates):
     """Pretty-prints a list of dates with day, time, etc."""
+    dates = sorted(raw_dates, key=lambda x:x.date.date())
     for day, group in itertools.groupby(dates, lambda x:x.date.date()):
         first = True
         for event in sorted(group, key=lambda x:x.date.time()):
-            description = wordwrap(str(event.description), TEXT_WIDTH)
-            print "%s %s %s" % ([" "*DATE_STRING_LENGTH ,str(day)][first], 
+            name = wordwrap(str(event.name), TEXT_WIDTH)
+            datestring = datetime.strftime(day,DATE_FORMAT)
+            print "%s %s %s" % ([" "*DATE_STRING_LENGTH, datestring][first], 
                                 str(event.date.time())[:8],
-                                description[0].strip())
-            for r in description[1:]:
+                                name[0].strip())
+            for r in name[1:]:
                 print " "*(DATE_STRING_LENGTH+TIME_STRING_LENGTH+2) + r.strip()
             first = False
 
@@ -43,6 +57,28 @@ def initialize():
     global CONSOLE_WIDTH, TEXT_WIDTH
     CONSOLE_WIDTH = int(cols) if int(cols)!=0 else 80
     TEXT_WIDTH = CONSOLE_WIDTH - DATE_STRING_LENGTH - TIME_STRING_LENGTH - 2
+    opencalendar(CALENDAR_PATH)
+
+def opencalendar(path):
+    """Opens a calendar file and returns a sorted array of dates and
+    an array of tasks."""
+    caldir = os.path.dirname(path)
+    if not os.path.exists(caldir):
+        print caldir + " does not exist. Creating it."
+        os.makedirs(caldir)
+    if not os.path.exists(path):
+        print path + " does not exist. Creating it."
+        f = open(path, "w")
+        f.close()
+        return []
+    # here the important part
+    f = open(path, "r")
+    dates = []
+    tasks = []
+    for line in f:
+        parts = line.split("##")
+        dateinfo = parts[0]
+        new = Date(parts[1], date=date)
 
 # ================================ test stuff
 
@@ -64,7 +100,7 @@ def random_date(start, end):
 
 mydates = [Date("date " + str(i) + "".join([random.choice("abcdefgh  ") for _ in xrange(200)]), 
                 random_date(datetime.today(),datetime.today()+timedelta(2))) 
-           for i in xrange(20)]
+           for i in xrange(5)]
 
 initialize()
 printdates(mydates)
