@@ -69,5 +69,3 @@ mydates = [Date("date " + str(i) + "".join([random.choice("abcdefgh  ") for _ in
 initialize()
 printdates(mydates)
 
-for i in (wordwrap("Is there a way in python to programmatically determine the width of the console? I mean the number of characters that fits in one line without wrapping, not the pixel width of the window.", 50)):
-    print i
