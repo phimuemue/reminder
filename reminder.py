@@ -72,14 +72,19 @@ def extractdatefromcalendar(raw_date):
     date = raw_date[1:]
     date = date.split("+")[0]
     dsf = DATE_SAVED_FORMATS
-    if len(date)==16:
-        return (datetime.fromtimestamp(time.mktime(time.strptime(date[:8], dsf[0]))), 
-                datetime.fromtimestamp(time.mktime(time.strptime(date[8:], dsf[0]))), 
-                False)
-    else:
-        return (datetime.fromtimestamp(time.mktime(time.strptime(date[:14], dsf[1]))), 
-                datetime.fromtimestamp(time.mktime(time.strptime(date[14:], dsf[1]))), 
-                True)
+    datelength = 8 if len(date)==16 else 14
+    def makedate(d):
+        print d
+        dsfi = 0
+        l = 8
+        if len(d)==28:
+            dsfi = 1
+            l = 14
+        mydsf = dsf[dsfi]
+        r1 = datetime.fromtimestamp(time.mktime(time.strptime(d[:l],mydsf)))
+        r2 = datetime.fromtimestamp(time.mktime(time.strptime(d[l:],mydsf)))
+        return (r1, r2, not len(date)==16)
+    return makedate(date)
 
 def opencalendar(path):
     """Opens a calendar file and returns a sorted array of dates and
