@@ -33,7 +33,7 @@ def printdates(raw_dates):
             print ""
         for event in sorted(group, key=lambda x:x.date.time()):
             name = wordwrap(str(event.name), TEXT_WIDTH)
-            datestring = datetime.strftime(day,DATE_FORMAT)
+            datestring = day.strftime(DATE_FORMAT)
             tf = ["*"*TIME_STRING_LENGTH, str(event.date.time())[:8]]
             print "%s %s %s" % ([" "*DATE_STRING_LENGTH, datestring][first], 
                                 tf[event.usetime],
@@ -86,6 +86,13 @@ def extractdatefromcalendar(raw_date):
         return (r1, r2, not len(date)==16)
     return makedate(date)
 
+def datetocalendar(d):
+    """Takes a single date/task and converts it to a string that
+    can be written to the calendar file."""
+    result = ""
+    result = result + d.date.strftime("%Y%m%d%H%m%s")
+    return result
+
 def opencalendar(path):
     """Opens a calendar file and returns a sorted array of dates and
     an array of tasks."""
@@ -116,5 +123,9 @@ def opencalendar(path):
     return (sorted(dates, key=lambda x:x.date), tasks)
 
 initialize()
-printdates(opencalendar(CALENDAR_PATH)[0])
+cal = opencalendar(CALENDAR_PATH)[0]
+printdates(cal)
+for d in cal:
+    print datetocalendar(d)
+
 
