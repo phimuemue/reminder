@@ -19,10 +19,6 @@ CALENDAR_PATH = os.path.expanduser("~/Documents/reminder/default.reminder")
 DATE_SAVED_FORMATS = ["%Y%m%d",      # format for date only
                       "%Y%m%d%H%M%S" # format for "everything"
                       ]
-DATE_INPUT_FORMATS = ["%Y%m%d",     # 20121026     (date only)
-                      "%d.%m.%Y",   # 26.10.2012   (date only)
-                      "%Y%m%d%H%M", # 201210261930 (date and time)
-                      ]
 
 def printdates(raw_dates):
     """Pretty-prints a list of dates with day, time, etc."""
@@ -86,12 +82,27 @@ def extractdatefromcalendar(raw_date):
         return (r1, r2, not len(date)==16)
     return makedate(date)
 
-def datetocalendar(d):
-    """Takes a single date/task and converts it to a string that
-    can be written to the calendar file."""
-    result = ""
-    result = result + d.date.strftime("%Y%m%d%H%m%s")
-    return result
+def parsedate(d):
+    """Gets an input string (hopefully) representing a date
+    and returns a datetime object for the respective datetime."""
+    iden = lambda x:x
+    def adjustY(da):
+        return da.replace(year = datetime.today().year)
+    DATE_INPUT_FORMATS = [("%Y%m%d", iden),     # 20121026     (date only)
+                          ("%d.%m.%Y", iden),   # 26.10.2012   (date only)
+                          ("%Y%m%d%H%M", iden), # 201210261930 (date and time)
+                          ("%m%d", adjustY),    # 1024         (no year)
+                          ]
+    result = None
+    for (form, post) in DATE_INPUT_FORMATS:
+        try:
+            result = datetime(*(time.strptime(d, form)[0:6]))
+            result = post(result)
+        except:
+            pass
+        else:
+            return result
+    return None
 
 def opencalendar(path):
     """Opens a calendar file and returns a sorted array of dates and
@@ -113,10 +124,11 @@ def opencalendar(path):
         parts = line.split("##")
         dateinfo = parts[0]
         (s,e,usetime) = extractdatefromcalendar(dateinfo)
-        new = Date(parts[1], s, usetime=usetime)
         if dateinfo[0]=="d":
+            new = Date(parts[1], s, usetime=usetime)
             dates.append(new)
         elif dateinfo[1]=="t":
+            new = Task(parts[1], s, usetime=usetime)
             tasks.append(new)
         else:
             print "Warning. Unknown category."
@@ -125,7 +137,7 @@ def opencalendar(path):
 initialize()
 cal = opencalendar(CALENDAR_PATH)[0]
 printdates(cal)
-for d in cal:
-    print datetocalendar(d)
+# for d in cal:
+#     print d.calendarstring()
 
-
+print parsedate("1011")
