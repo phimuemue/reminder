@@ -7,6 +7,7 @@ import time
 from datetime import timedelta, datetime
 
 import optparse
+from optparse import OptionParser
 
 from date import *
 from rcalendar import *
@@ -18,10 +19,6 @@ def initialize():
     """Retrieves some information about the environment, 
     and stores them into the specific vars. Also takes care of proper
     initialization of calendar files etc."""
-    (rows, cols) = os.popen("stty size", "r").read().split()
-    global CONSOLE_WIDTH, TEXT_WIDTH
-    CONSOLE_WIDTH = int(cols) if int(cols)!=0 else 80
-    TEXT_WIDTH = CONSOLE_WIDTH - DATE_STRING_LENGTH - TIME_STRING_LENGTH - 2
 
 
 def parsedate(d):
@@ -48,8 +45,25 @@ def parsedate(d):
 
 def main():
     """The well-known main function."""
-    initialize()
-    cal = RCalendar(CALENDAR_PATH)
-    printdates(cal.dates)
+    # get terminal size and adjust printing parameters
+    (rows, cols) = os.popen("stty size", "r").read().split()
+    global CONSOLE_WIDTH, TEXT_WIDTH
+    CONSOLE_WIDTH = int(cols) if int(cols)!=0 else 80
+    TEXT_WIDTH = CONSOLE_WIDTH - DATE_STRING_LENGTH - TIME_STRING_LENGTH - 2
+    # read command line arguments
+    parser = OptionParser()
+    parser.add_option("-f", "--file", 
+                        action="store", 
+                        type="string", 
+                        dest="calendar_path",
+                        default=CALENDAR_PATH)
+    (options, args) = parser.parse_args()
+    # positional arguments determine action
+    if len(args)==0 or args[0]=="show" or args[0]=="s":
+        cal = RCalendar(options.calendar_path)
+        printdates(cal.dates)
+    if args[0]=="add" or args[0]=="a":
+        print parsedate(args[1])
 
-main()
+if __name__ == "__main__":
+    main()
