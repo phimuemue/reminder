@@ -1,8 +1,12 @@
+#! /usr/bin/env python
+
 import itertools
 import os
 import os.path
 import time
 from datetime import timedelta, datetime
+
+import optparse
 
 from date import *
 from rcalendar import *
@@ -42,8 +46,10 @@ def parsedate(d):
             return result
     return None
 
-initialize()
-cal = RCalendar(CALENDAR_PATH)
-printdates(cal.dates)
+def main():
+    """The well-known main function."""
+    initialize()
+    cal = RCalendar(CALENDAR_PATH)
+    printdates(cal.dates)
 
-print parsedate("1011")
+main()
