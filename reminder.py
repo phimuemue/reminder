@@ -5,6 +5,9 @@ import time
 from datetime import timedelta, datetime
 
 from date import *
+from rcalendar import *
+
+from settings import *
 
 # parameters for pretty-print-output
 CONSOLE_WIDTH = 80
@@ -14,11 +17,6 @@ TEXT_WIDTH = 80 - 10 - 1 - 8 - 1
 DATE_FORMAT = "%d.%m.%Y"
 SEPARATE_DAYS = True
 
-# parameters for calendar files
-CALENDAR_PATH = os.path.expanduser("~/Documents/reminder/default.reminder")
-DATE_SAVED_FORMATS = ["%Y%m%d",      # format for date only
-                      "%Y%m%d%H%M%S" # format for "everything"
-                      ]
 
 def printdates(raw_dates):
     """Pretty-prints a list of dates with day, time, etc."""
@@ -61,26 +59,6 @@ def initialize():
     CONSOLE_WIDTH = int(cols) if int(cols)!=0 else 80
     TEXT_WIDTH = CONSOLE_WIDTH - DATE_STRING_LENGTH - TIME_STRING_LENGTH - 2
 
-def extractdatefromcalendar(raw_date):
-    """Expects the *raw* date part (i.e. with type-specification
-    and +(y/w/d/number) and extracts the beginning and end and whether
-    the time is considered or not."""
-    date = raw_date[1:]
-    date = date.split("+")[0]
-    dsf = DATE_SAVED_FORMATS
-    datelength = 8 if len(date)==16 else 14
-    def makedate(d):
-        print d
-        dsfi = 0
-        l = 8
-        if len(d)==28:
-            dsfi = 1
-            l = 14
-        mydsf = dsf[dsfi]
-        r1 = datetime.fromtimestamp(time.mktime(time.strptime(d[:l],mydsf)))
-        r2 = datetime.fromtimestamp(time.mktime(time.strptime(d[l:],mydsf)))
-        return (r1, r2, not len(date)==16)
-    return makedate(date)
 
 def parsedate(d):
     """Gets an input string (hopefully) representing a date
@@ -104,40 +82,8 @@ def parsedate(d):
             return result
     return None
 
-def opencalendar(path):
-    """Opens a calendar file and returns a sorted array of dates and
-    an array of tasks."""
-    caldir = os.path.dirname(path)
-    if not os.path.exists(caldir):
-        print caldir + " does not exist. Creating it."
-        os.makedirs(caldir)
-    if not os.path.exists(path):
-        print path + " does not exist. Creating it."
-        f = open(path, "w")
-        f.close()
-        return []
-    # here the important part
-    f = open(path, "r")
-    dates = []
-    tasks = []
-    for line in f:
-        parts = line.split("##")
-        dateinfo = parts[0]
-        (s,e,usetime) = extractdatefromcalendar(dateinfo)
-        if dateinfo[0]=="d":
-            new = Date(parts[1], s, usetime=usetime)
-            dates.append(new)
-        elif dateinfo[1]=="t":
-            new = Task(parts[1], s, usetime=usetime)
-            tasks.append(new)
-        else:
-            print "Warning. Unknown category."
-    return (sorted(dates, key=lambda x:x.date), tasks)
-
 initialize()
-cal = opencalendar(CALENDAR_PATH)[0]
-printdates(cal)
-# for d in cal:
-#     print d.calendarstring()
+cal = RCalendar(CALENDAR_PATH)
+printdates(cal.dates)
 
 print parsedate("1011")
