@@ -52,12 +52,10 @@ def parsedate(d):
     td = timedelta(seconds=0)
     duration = defaultdict(lambda : 0)
     if a.group(2) is not None:
-        print "Dauer da: ", a.group(2)
         duration[a.group(2)[-1]] = int(a.group(2)[:-1])
         td = timedelta(days=duration["d"],
                        hours=duration["h"],
                        minutes=duration["m"])
-        print td
     return (result, result+td)
 
 def main():
@@ -85,8 +83,13 @@ def main():
         cal = RCalendar(options.calendar_path)
         printdates(cal.dates)
     elif args[0]=="add" or args[0]=="a":
-        print parsedate(args[1])
-        # print args[1:]
+        (start, end) = parsedate(args[1])
+        print start, end
+        d = Date(" ".join(args[2:]), start, end)
+        f = open(options.calendar_path, "a")
+        f.write(d.calendarstring())
+        f.close()
+        print d.calendarstring()
 
 if __name__ == "__main__":
     main()

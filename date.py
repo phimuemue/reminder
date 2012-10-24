@@ -24,13 +24,15 @@ class Date(Task):
     """A simple class holding a date."""
     props = {}
     repetition = ""
-    def __init__(self, name, date=date.today(), usetime=True, repetition=""):
+    def __init__(self, name, date=date.today(), end=date.today(), usetime=True, repetition=""):
         Task.__init__(self, name, date, usetime)
         self.repetition = repetition
+        self.end = end
     def calendarstring(self):
         """Returns a string that can be written to the calender file."""
-        result = "t"
-        result = result + self.date.strftime("%Y%m%d%H%m%s") 
+        result = "d"
+        result = result + self.date.strftime("%Y%m%d%H%M00") 
+        result = result + self.end.strftime("%Y%m%d%H%M00") 
         if not self.repetition=="":
             result = result + "+" + self.repetition
         result = result + "##"
