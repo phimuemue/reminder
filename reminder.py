@@ -21,6 +21,7 @@ def parsedate(d):
     iden = lambda x:x
     def adjustY(da):
         return da.replace(year = datetime.today().year)
+    DATE_INPUT_RE = ["^(\d{8})((\+\d+[mhd]))?$"]
     DATE_INPUT_FORMATS = [("%Y%m%d", iden),     # 20121026     (date only)
                           ("%d.%m.%Y", iden),   # 26.10.2012   (date only)
                           ("%Y%m%d%H%M", iden), # 201210261930 (date and time)
@@ -56,7 +57,7 @@ def main():
     if len(args)==0 or args[0]=="show" or args[0]=="s":
         cal = RCalendar(options.calendar_path)
         printdates(cal.dates)
-    if args[0]=="add" or args[0]=="a":
+    elif args[0]=="add" or args[0]=="a":
         print parsedate(args[1])
 
 if __name__ == "__main__":
