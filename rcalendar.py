@@ -16,7 +16,6 @@ def extractdatefromcalendar(raw_date):
     dsf = DATE_SAVED_FORMATS
     datelength = 8 if len(date)==16 else 14
     def makedate(d):
-        #print d
         dsfi = 0
         l = 8
         if len(d)==28:
