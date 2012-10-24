@@ -15,12 +15,6 @@ from printer import *
 
 from settings import *
 
-def initialize():
-    """Retrieves some information about the environment, 
-    and stores them into the specific vars. Also takes care of proper
-    initialization of calendar files etc."""
-
-
 def parsedate(d):
     """Gets an input string (hopefully) representing a date
     and returns a datetime object for the respective datetime."""
