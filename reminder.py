@@ -5,9 +5,10 @@ import os
 import os.path
 import time
 from datetime import timedelta, datetime
-
+import re
 import optparse
 from optparse import OptionParser
+from collections import defaultdict
 
 from date import *
 from rcalendar import *
@@ -18,10 +19,22 @@ from settings import *
 def parsedate(d):
     """Gets an input string (hopefully) representing a date
     and returns a datetime object for the respective datetime."""
+    # auxiliary functions
     iden = lambda x:x
     def adjustY(da):
         return da.replace(year = datetime.today().year)
-    DATE_INPUT_RE = ["^(\d{8})((\+\d+[mhd]))?$"]
+    # parse complete date string (including possibly duration)
+    # according to certain regexp
+    DATE_INPUT_RE = ["^(\d+)((\+\d+[mhd]?))?$"]
+    a = None
+    for rexp in DATE_INPUT_RE:
+        a = re.match(rexp, d)
+        if a is not None:
+            break
+    if a is None:
+        return None
+    # now we should have a combination of start date and duration
+    startdate = a.group(1)
     DATE_INPUT_FORMATS = [("%Y%m%d", iden),     # 20121026     (date only)
                           ("%d.%m.%Y", iden),   # 26.10.2012   (date only)
                           ("%Y%m%d%H%M", iden), # 201210261930 (date and time)
@@ -30,13 +43,22 @@ def parsedate(d):
     result = None
     for (form, post) in DATE_INPUT_FORMATS:
         try:
-            result = datetime(*(time.strptime(d, form)[0:6]))
+            result = datetime(*(time.strptime(startdate, form)[0:6]))
             result = post(result)
         except:
             pass
         else:
-            return result
-    return None
+            break
+    td = timedelta(seconds=0)
+    duration = defaultdict(lambda : 0)
+    if a.group(2) is not None:
+        print "Dauer da: ", a.group(2)
+        duration[a.group(2)[-1]] = int(a.group(2)[:-1])
+        td = timedelta(days=duration["d"],
+                       hours=duration["h"],
+                       minutes=duration["m"])
+        print td
+    return (result, result+td)
 
 def main():
     """The well-known main function."""
@@ -52,6 +74,11 @@ def main():
                         type="string", 
                         dest="calendar_path",
                         default=CALENDAR_PATH)
+    parser.add_option("-c", "--category",
+                        action="store",
+                        type="string",
+                        dest="category",
+                        default="")
     (options, args) = parser.parse_args()
     # positional arguments determine action
     if len(args)==0 or args[0]=="show" or args[0]=="s":
@@ -59,6 +86,7 @@ def main():
         printdates(cal.dates)
     elif args[0]=="add" or args[0]=="a":
         print parsedate(args[1])
+        # print args[1:]
 
 if __name__ == "__main__":
     main()
