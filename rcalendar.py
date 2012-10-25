@@ -36,7 +36,7 @@ class RCalendar:
         If the file is not present, it will be created. So do non-existent
         intermediate (sub)dirs on the way to the file."""
         caldir = os.path.dirname(path)
-        if not os.path.exists(caldir):
+        if caldir!="" and not os.path.exists(caldir):
             print caldir + " does not exist. Creating it."
             os.makedirs(caldir)
         if not os.path.exists(path):

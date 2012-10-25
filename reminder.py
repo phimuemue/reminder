@@ -73,6 +73,7 @@ def main():
     # read command line arguments
     parser = OptionParser()
     parser.add_option("-f", "--file", 
+                        help="Specify a calendar file to open.",
                         action="store", 
                         type="string", 
                         dest="calendar_path",
@@ -81,6 +82,16 @@ def main():
                         action="store",
                         type="string",
                         dest="category",
+                        default="")
+    parser.add_option("-p", "--place",
+                        action="store",
+                        type="string",
+                        dest="place",
+                        default="")
+    parser.add_option("-<", "--before",
+                        action="store",
+                        type="string",
+                        dest="before",
                         default="")
     (options, args) = parser.parse_args()
     # positional arguments determine action

@@ -4,11 +4,10 @@ from settings import *
 
 def printdates(raw_dates):
     """Pretty-prints a list of dates with day, time, etc."""
+    print "="*(CONSOLE_WIDTH-1)
     dates = sorted(raw_dates, key=lambda x:x.date.date())
     for day, group in itertools.groupby(dates, lambda x:x.date.date()):
         first = True
-        if SEPARATE_DAYS:
-            print ""
         for event in sorted(group, key=lambda x:x.date.time()):
             name = wordwrap(str(event.name), TEXT_WIDTH)
             datestring = day.strftime(DATE_FORMAT)
@@ -19,6 +18,9 @@ def printdates(raw_dates):
             for r in name[1:]:
                 print " "*(DATE_STRING_LENGTH+TIME_STRING_LENGTH+2) + r.strip()
             first = False
+        if SEPARATE_DAYS:
+            print ""
+    print "="*(CONSOLE_WIDTH-1)
 
 def wordwrap(string, width):
     """Takes a string and returns an array holding the single lines
