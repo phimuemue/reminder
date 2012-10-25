@@ -1,11 +1,22 @@
 import os
 import os.path
 import time
-from datetime import timedelta, datetime
+from datetime import timedelta
 
 from settings import *
 
 from date import *
+
+class FilterableList(list):
+    def __call__(self,
+                 before=None,
+                 after=None):
+        for i in self:
+            if before is not None and i.date > before:
+                continue
+            if after is not None and i.end < after:
+                continue
+            yield i
 
 def extractdatefromcalendar(raw_date):
     """Expects the *raw* date part (i.e. with type-specification
@@ -28,8 +39,8 @@ def extractdatefromcalendar(raw_date):
     return makedate(date)
 
 class RCalendar:
-    dates = []
-    tasks = []
+    dates = FilterableList()
+    tasks = FilterableList()
     def __init__(self, path):
         """Opens a calendar file and returns a sorted array of dates and
         an array of tasks.
@@ -53,10 +64,10 @@ class RCalendar:
             dateinfo = parts[0]
             (s,e,wholeday) = extractdatefromcalendar(dateinfo)
             if dateinfo[0]=="d":
-                new = Date(parts[1], s, wholeday=wholeday)
+                new = Date(parts[1], s, e, wholeday=wholeday)
                 self.dates.append(new)
             elif dateinfo[1]=="t":
-                new = Task(parts[1], s, wholeday=wholeday)
+                new = Task(parts[1], s, e, wholeday=wholeday)
                 self.tasks.append(new)
             else:
                 print "Warning. Unknown category."

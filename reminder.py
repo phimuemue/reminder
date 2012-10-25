@@ -4,7 +4,7 @@ import itertools
 import os
 import os.path
 import time
-from datetime import timedelta, datetime
+from datetime import timedelta
 import re
 import optparse
 from optparse import OptionParser
@@ -19,6 +19,8 @@ from settings import *
 def parsedate(d):
     """Gets an input string (hopefully) representing a date
     and returns a datetime object for the respective datetime."""
+    if d is None:
+        return (None, None, False)
     # auxiliary functions
     iden = lambda x:x
     def adjustY(da):
@@ -92,12 +94,18 @@ def main():
                         action="store",
                         type="string",
                         dest="before",
-                        default="")
+                        default=None)
+    parser.add_option("->", "--after",
+                        action="store",
+                        type="string",
+                        dest="after",
+                        default=None)
     (options, args) = parser.parse_args()
     # positional arguments determine action
     if len(args)==0 or args[0]=="show" or args[0]=="s":
         cal = RCalendar(options.calendar_path)
-        printdates(cal.dates)
+        printdates(cal.dates(after=parsedate(options.after)[0],
+                                before=parsedate(options.before)[0]))
     elif args[0]=="add" or args[0]=="a":
         (start, end, wholeday) = parsedate(args[1])
         print start, end
