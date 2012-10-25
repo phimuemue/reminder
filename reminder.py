@@ -35,16 +35,21 @@ def parsedate(d):
         return None
     # now we should have a combination of start date and duration
     startdate = a.group(1)
-    DATE_INPUT_FORMATS = [("%Y%m%d", iden),     # 20121026     (date only)
-                          ("%d.%m.%Y", iden),   # 26.10.2012   (date only)
-                          ("%Y%m%d%H%M", iden), # 201210261930 (date and time)
-                          ("%m%d", adjustY),    # 1024         (no year)
+    DATE_INPUT_FORMATS = [("%Y%m%d", 
+                           lambda x: (iden(x),True)), # 20121026  (date only)
+                          ("%d.%m.%Y", 
+                           lambda x: (iden(x),True)),  # 26.10.2012 (date only)
+                          ("%Y%m%d%H%M", 
+                           lambda x: (iden(x),False)),# 201210261930(datetime)
+                          ("%m%d", 
+                           lambda x: (adjustY(x), True)),# 1024     (no year)
                           ]
     result = None
     for (form, post) in DATE_INPUT_FORMATS:
         try:
             result = datetime(*(time.strptime(startdate, form)[0:6]))
             result = post(result)
+            result, wholeday = result
         except:
             pass
         else:
@@ -56,7 +61,7 @@ def parsedate(d):
         td = timedelta(days=duration["d"],
                        hours=duration["h"],
                        minutes=duration["m"])
-    return (result, result+td)
+    return (result, result+td, wholeday)
 
 def main():
     """The well-known main function."""
@@ -83,9 +88,9 @@ def main():
         cal = RCalendar(options.calendar_path)
         printdates(cal.dates)
     elif args[0]=="add" or args[0]=="a":
-        (start, end) = parsedate(args[1])
+        (start, end, wholeday) = parsedate(args[1])
         print start, end
-        d = Date(" ".join(args[2:]), start, end)
+        d = Date(" ".join(args[2:]), start, end, wholeday=wholeday)
         f = open(options.calendar_path, "a")
         f.write(d.calendarstring())
         f.close()

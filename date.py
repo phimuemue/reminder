@@ -31,10 +31,15 @@ class Date(Task):
     def calendarstring(self):
         """Returns a string that can be written to the calender file."""
         result = "d"
-        result = result + self.date.strftime("%Y%m%d%H%M00") 
-        result = result + self.end.strftime("%Y%m%d%H%M00") 
+        if not self.wholeday:
+            result = result + self.date.strftime("%Y%m%d%H%M00") 
+            result = result + self.end.strftime("%Y%m%d%H%M00") 
+        else:
+            result = result + self.date.strftime("%Y%m%d") 
+            result = result + self.end.strftime("%Y%m%d") 
         if not self.repetition=="":
             result = result + "+" + self.repetition
         result = result + "##"
         result = result + self.name
+        result = result + "\n"
         return result  
