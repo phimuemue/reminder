@@ -14,7 +14,7 @@ def printdates(raw_dates):
             datestring = day.strftime(DATE_FORMAT)
             tf = ["*"*TIME_STRING_LENGTH, str(event.date.time())[:8]]
             print "%s %s %s" % ([" "*DATE_STRING_LENGTH, datestring][first], 
-                                tf[event.usetime],
+                                tf[event.wholeday],
                                 name[0].strip())
             for r in name[1:]:
                 print " "*(DATE_STRING_LENGTH+TIME_STRING_LENGTH+2) + r.strip()

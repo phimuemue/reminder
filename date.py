@@ -3,8 +3,8 @@ from datetime import date
 class Task:
     """A simple class for tasks, also a base-class for dates."""
     props = {}
-    def __init__(self, name, date=date.today(), usetime=False):
-        self.usetime = usetime
+    def __init__(self, name, date=date.today(), wholeday=False):
+        self.wholeday = wholeday
         self.name = name
         self.date = date
     def __str__(self):
@@ -24,8 +24,8 @@ class Date(Task):
     """A simple class holding a date."""
     props = {}
     repetition = ""
-    def __init__(self, name, date=date.today(), end=date.today(), usetime=True, repetition=""):
-        Task.__init__(self, name, date, usetime)
+    def __init__(self, name, date=date.today(), end=date.today(), wholeday=True, repetition=""):
+        Task.__init__(self, name, date, wholeday)
         self.repetition = repetition
         self.end = end
     def calendarstring(self):

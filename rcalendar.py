@@ -51,12 +51,12 @@ class RCalendar:
         for line in f:
             parts = line.split("##")
             dateinfo = parts[0]
-            (s,e,usetime) = extractdatefromcalendar(dateinfo)
+            (s,e,wholeday) = extractdatefromcalendar(dateinfo)
             if dateinfo[0]=="d":
-                new = Date(parts[1], s, usetime=usetime)
+                new = Date(parts[1], s, wholeday=wholeday)
                 self.dates.append(new)
             elif dateinfo[1]=="t":
-                new = Task(parts[1], s, usetime=usetime)
+                new = Task(parts[1], s, wholeday=wholeday)
                 self.tasks.append(new)
             else:
                 print "Warning. Unknown category."
