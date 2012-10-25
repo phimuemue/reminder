@@ -118,12 +118,12 @@ def main():
                         type="string",
                         dest="place",
                         default="")
-    parser.add_option("-<", "--before",
+    parser.add_option("--before",
                         action="store",
                         type="string",
                         dest="before",
                         default=None)
-    parser.add_option("->", "--after",
+    parser.add_option("--after",
                         action="store",
                         type="string",
                         dest="after",
