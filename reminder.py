@@ -16,27 +16,29 @@ from printer import *
 
 from settings import *
 
-def parsedate(d):
-    """Gets an input string (hopefully) representing a date
-    and returns a datetime object for the respective datetime."""
-    if d is None:
-        return (None, None, False)
+def date_with_duration(a):
+    """Takes a date with duration and returns two datetime objects,
+    one for the start, one for the end, and whether it's a whole-day.
+    a is assumed to be the proper result of a re.match."""
+    start, wholeday = parse_single_date(a.group(1))
+    td = timedelta(seconds=0)
+    duration = defaultdict(lambda : 0)
+    if a.group(2) is not None:
+        duration[a.group(2)[-1]] = int(a.group(2)[:-1])
+        td = timedelta(days=duration["d"],
+                       hours=duration["h"],
+                       minutes=duration["m"])
+    return (start, start+td, wholeday)
+    
+
+def parse_single_date(d):
+    """This takes a *single* date (without duration/repetition)
+    and returns the proper datetime and whether it isa whole day."""
     # auxiliary functions
     iden = lambda x:x
     def adjustY(da):
         return da.replace(year = datetime.today().year)
-    # parse complete date string (including possibly duration)
-    # according to certain regexp
-    DATE_INPUT_RE = ["^(\d+)((\+\d+[mhd]?))?$"]
-    a = None
-    for rexp in DATE_INPUT_RE:
-        a = re.match(rexp, d)
-        if a is not None:
-            break
-    if a is None:
-        return None
-    # now we should have a combination of start date and duration
-    startdate = a.group(1)
+    # actual stuff
     DATE_INPUT_FORMATS = [("%Y%m%d", 
                            lambda x: (iden(x),True)), # 20121026  (date only)
                           ("%d.%m.%Y", 
@@ -49,22 +51,48 @@ def parsedate(d):
     result = None
     for (form, post) in DATE_INPUT_FORMATS:
         try:
-            result = datetime(*(time.strptime(startdate, form)[0:6]))
+            result = datetime(*(time.strptime(d, form)[0:6]))
             result = post(result)
-            result, wholeday = result
         except:
             pass
         else:
             break
-    td = timedelta(seconds=0)
-    duration = defaultdict(lambda : 0)
-    if a.group(2) is not None:
-        duration[a.group(2)[-1]] = int(a.group(2)[:-1])
-        td = timedelta(days=duration["d"],
-                       hours=duration["h"],
-                       minutes=duration["m"])
-    return (result, result+td, wholeday)
+    return result
 
+def parsedate(d):
+    """Gets an input string (hopefully) representing a date
+    and returns the following: Start date, end date, and whether it's a
+    whole-day-event. If nothing is recognized, (None, None, False) is
+    returned.
+    
+    I tried to support quite a range of possible date formats:
+
+    20121010       Year, Month, Day, whole day event
+    1.4.2012       Usual (german) spelling of dates, whole day
+    201210131500   Day with specific time
+    1005           Just a day (current year inserted)
+
+    Moreover, the user can specify a time range. Up to now, only
+    one kind of specification is allowed. A date (in one of the 
+    above formats), followed by a "+"-sign, and then the duration,
+    e.g:
+    201210201500+2h (means starting at 15:00 o'clock, enduring 2 hours
+    """
+    if d is None:
+        return (None, None, False)
+    # parse complete date string (including possibly duration)
+    # according to certain regexp
+    DATE_INPUT_RE = [("^(\d+)((\+\d+[mhd]?))?$", date_with_duration), ]
+    a = None
+    for (rexp,post) in DATE_INPUT_RE:
+        a = re.match(rexp, d)
+        if a is not None:
+            break
+    if a is None:
+        return None
+    return post(a)
+    # now we should have a combination of start date and duration
+    
 def main():
     """The well-known main function."""
     # get terminal size and adjust printing parameters
