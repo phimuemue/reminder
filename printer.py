@@ -20,8 +20,13 @@ def printdates(raw_dates):
                 toprint.append(
                     " "*(DATE_STRING_LENGTH+TIME_STRING_LENGTH+2) + r.strip())
             first = False
+        toprint.append("\n");
     toprint.append("="*(CONSOLE_WIDTH-1))
-    print "\n\n".join(toprint)
+    # TODO: The following is ugly, but it's too late for 
+    #       me to find out the real bug.
+    result = "\n".join(toprint)
+    result = result.replace("\n\n", "\n")
+    print result
 
 def wordwrap(string, width):
     """Takes a string and returns an array holding the single lines
