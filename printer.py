@@ -1,27 +1,27 @@
 import itertools
 
-from settings import *
+import settings 
 
 def printdates(raw_dates):
     """Pretty-prints a list of dates with day, time, etc."""
-    toprint = ["="*(CONSOLE_WIDTH-1)]
+    toprint = ["="*(settings.CONSOLE_WIDTH-1)]
     dates = sorted(raw_dates, key=lambda x:x.date.date())
     for day, group in itertools.groupby(dates, lambda x:x.date.date()):
         first = True
         for event in sorted(group, key=lambda x:x.date.time()):
-            name = wordwrap(str(event.name), TEXT_WIDTH)
-            datestring = day.strftime(DATE_FORMAT)
-            tf = ["*"*TIME_STRING_LENGTH, str(event.date.time())[:8]]
+            name = wordwrap(str(event.name), settings.TEXT_WIDTH)
+            datestring = day.strftime(settings.DATE_FORMAT)
+            tf = ["*"*settings.TIME_STRING_LENGTH, str(event.date.time())[:8]]
             toprint.append ("%s %s %s" % 
-                            ([" "*DATE_STRING_LENGTH, datestring][first], 
+                            ([" "*settings.DATE_STRING_LENGTH, datestring][first], 
                              tf[event.wholeday],
                              name[0].strip()))
             for r in name[1:]:
                 toprint.append(
-                    " "*(DATE_STRING_LENGTH+TIME_STRING_LENGTH+2) + r.strip())
+                    " "*(settings.DATE_STRING_LENGTH+settings.TIME_STRING_LENGTH+2) + r.strip())
             first = False
         toprint.append("\n");
-    toprint.append("="*(CONSOLE_WIDTH-1))
+    toprint.append("="*(settings.CONSOLE_WIDTH-1))
     # TODO: The following is ugly, but it's too late for 
     #       me to find out the real bug.
     result = "\n".join(toprint)

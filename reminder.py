@@ -14,7 +14,7 @@ from date import *
 from rcalendar import *
 from printer import *
 
-from settings import *
+import settings
 
 def date_with_duration(a):
     """Takes a date with duration and returns two datetime objects,
@@ -97,9 +97,11 @@ def main():
     """The well-known main function."""
     # get terminal size and adjust printing parameters
     (rows, cols) = os.popen("stty size", "r").read().split()
-    global CONSOLE_WIDTH, TEXT_WIDTH
-    CONSOLE_WIDTH = int(cols) if int(cols)!=0 else 80
-    TEXT_WIDTH = CONSOLE_WIDTH - DATE_STRING_LENGTH - TIME_STRING_LENGTH - 2
+    #global CONSOLE_WIDTH, TEXT_WIDTH
+    settings.CONSOLE_WIDTH = int(cols) if int(cols)!=0 else 80
+    settings.TEXT_WIDTH = settings.CONSOLE_WIDTH - \
+                          settings.DATE_STRING_LENGTH - \
+                          settings.TIME_STRING_LENGTH - 2
     # read command line arguments
     parser = OptionParser()
     parser.add_option("-f", "--file", 
